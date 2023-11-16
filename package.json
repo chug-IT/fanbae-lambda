@@ -1,0 +1,18 @@
+{
+  "name": "fanbae-lambda",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --outfile=dist/index.mjs --sourcemap --minify --format=esm",
+    "postbuild": "zip -j dist/index.zip dist/index.mjs dist/index.mjs.map",
+    "format": "prettier --write .",
+    "lint": "prettier --check . && eslint .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.126",
+    "esbuild": "^0.19.5",
+    "eslint": "^8.53.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.2.2"
+  }
+}
