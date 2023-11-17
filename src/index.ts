@@ -1,9 +1,9 @@
 import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
-import { authHandler } from './routes/auth';
+import { auth } from './routes/auth';
 
 export const handler: APIGatewayProxyHandlerV2 = async (event, context) => {
   if (/^\/auth\/v1\/.*$/.test(event.rawPath)) {
-    return authHandler(event);
+    return auth(event);
   }
 
   return {

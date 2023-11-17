@@ -2,8 +2,8 @@
   "name": "fanbae-lambda",
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --outfile=dist/index.mjs --sourcemap --minify --format=esm",
-    "postbuild": "zip -j dist/index.zip dist/index.mjs dist/index.mjs.map",
+    "build": "esbuild src/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js",
+    "postbuild": "cd dist && zip -r index.zip index.js*",
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,5 +14,9 @@
     "eslint": "^8.53.0",
     "prettier": "^3.1.0",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.451.0",
+    "@aws-sdk/lib-dynamodb": "^3.451.0"
   }
 }

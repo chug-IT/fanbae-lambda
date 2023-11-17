@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
-    "target": "es2020" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
-    "module": "ES2020" /* Specify what module code is generated. */,
-    "strict": true /* Enable all strict type-checking options. */,
-    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables `allowSyntheticDefaultImports` for type compatibility. */,
-    "skipLibCheck": true /* Skip type checking for all the declaration files (*.d.ts). */,
-    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
-    "noEmit": true /* Do not emit outputs. */,
-    "moduleResolution": "Bundler" /* Specify how TypeScript looks up a file from a given module specifier. */,
+    "target": "es2020",
+    "strict": true,
+    "preserveConstEnums": true,
+    "noEmit": true,
+    "sourceMap": false,
+    "module":"commonjs",
+    "moduleResolution":"node",
+    "esModuleInterop": true, 
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true, 
+    "isolatedModules": true, 
   },
-  "include": ["src/**/*"] /* Specify file inclusion pattern for the program. */,
-  "exclude": [
-    "node_modules"
-  ] /* Specify file exclusion patterns for the program. */
+  "exclude": ["node_modules", "**/*.test.ts"]
 }
