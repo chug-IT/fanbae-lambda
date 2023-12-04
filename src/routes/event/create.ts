@@ -2,13 +2,13 @@ import {
   APIGatewayProxyEventV2,
   APIGatewayProxyStructuredResultV2,
 } from 'aws-lambda';
-import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { client } from '../../dynamo';
-import jwt from 'jsonwebtoken';
+import { PutCommand } from '@aws-sdk/lib-dynamodb';
 
-export const register = async (
+export const create = async (
   event: APIGatewayProxyEventV2
 ): Promise<APIGatewayProxyStructuredResultV2> => {
+  console.log(`Event create was called`);
   if (event.requestContext.http.method !== 'POST') {
     return {
       statusCode: 405,
@@ -17,31 +17,25 @@ export const register = async (
       }),
     };
   }
-
-  const { name, email, phone, password, birthday } = JSON.parse(
-    event.body || '{}'
-  );
-
-  if (!name || !email || !phone || !password || !birthday) {
+  const { name, date, location } = JSON.parse(event.body || '{}');
+  if (!name || !date || !location) {
     return {
       statusCode: 400,
       body: JSON.stringify({
-        message: `Name, email, phone, password and birthday are required`,
+        message: `Name, date and location are required`,
       }),
     };
   }
-
   try {
     await client.send(
       new PutCommand({
-        TableName: 'users',
-        Item: { name, email, phone, password, birthday: parseInt(birthday) },
-        ConditionExpression: 'attribute_not_exists(email)',
+        TableName: 'events',
+        Item: { name, date: parseInt(date), location },
+        ConditionExpression: 'attribute_not_exists(name)',
       })
     );
   } catch (error) {
     console.error(error);
-
     if (
       error instanceof Error &&
       error.name === 'ConditionalCheckFailedException'
@@ -49,11 +43,10 @@ export const register = async (
       return {
         statusCode: 409,
         body: JSON.stringify({
-          message: `User with email ${email} already exists`,
+          message: `Event with name ${name} already exists`,
         }),
       };
     }
-
     return {
       statusCode: 500,
       body: JSON.stringify({
@@ -62,15 +55,10 @@ export const register = async (
       }),
     };
   }
-
-  const authToken = jwt.sign({ email }, process.env.JWT_SECRET!);
-
   return {
     statusCode: 200,
     body: JSON.stringify({
-      message: `Auth register was called`,
-      user: { name, email, phone, birthday },
-      authToken,
+      message: `Event ${name} created`,
     }),
   };
 };

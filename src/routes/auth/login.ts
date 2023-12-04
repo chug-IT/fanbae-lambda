@@ -2,6 +2,9 @@ import {
   APIGatewayProxyEventV2,
   APIGatewayProxyStructuredResultV2,
 } from 'aws-lambda';
+import { client } from '../../dynamo';
+import { GetCommand } from '@aws-sdk/lib-dynamodb';
+import jwt from 'jsonwebtoken';
 
 export const login = async (
   event: APIGatewayProxyEventV2
@@ -16,9 +19,9 @@ export const login = async (
     };
   }
 
-  const { username, password } = JSON.parse(event.body || '{}');
+  const { email, password } = JSON.parse(event.body || '{}');
 
-  if (!username || !password) {
+  if (!email || !password) {
     return {
       statusCode: 400,
       body: JSON.stringify({
@@ -27,10 +30,32 @@ export const login = async (
     };
   }
 
+  const getCommandOutput = await client.send(
+    new GetCommand({ TableName: 'users', Key: { email } })
+  );
+
+  if (!getCommandOutput.Item || getCommandOutput.Item.password !== password) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({
+        message: `Invalid username or password`,
+      }),
+    };
+  }
+
+  delete getCommandOutput.Item.password;
+
+  const authToken = jwt.sign(
+    getCommandOutput.Item.email,
+    process.env.JWT_SECRET!
+  );
+
   return {
     statusCode: 200,
     body: JSON.stringify({
-      message: `Auth login was called`,
+      authToken,
+      user: getCommandOutput.Item,
+      message: `Login successful`,
     }),
   };
 };
