@@ -27,6 +27,7 @@ export const register = async (
       statusCode: 400,
       body: JSON.stringify({
         message: `Name, email, phone, password and birthday are required`,
+        info: `name: ${name}, email: ${email}, phone: ${phone}, password: ${password}, birthday: ${birthday}`,
       }),
     };
   }
@@ -34,9 +35,17 @@ export const register = async (
   try {
     await client.send(
       new PutCommand({
-        TableName: 'users',
-        Item: { name, email, phone, password, birthday: parseInt(birthday) },
-        ConditionExpression: 'attribute_not_exists(email)',
+        TableName: 'fanbae',
+        Item: {
+          PK: `USER#${email}`,
+          SK: `USER#${email}`,
+          name,
+          email,
+          phone,
+          birthday,
+          password,
+        },
+        ConditionExpression: 'attribute_not_exists(PK)',
       })
     );
   } catch (error) {
@@ -63,7 +72,7 @@ export const register = async (
     };
   }
 
-  const authToken = jwt.sign({ email }, process.env.JWT_SECRET!);
+  const authToken = jwt.sign(email, process.env.JWT_SECRET!);
 
   return {
     statusCode: 200,

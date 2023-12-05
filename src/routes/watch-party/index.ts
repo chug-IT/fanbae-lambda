@@ -4,7 +4,7 @@ import {
 } from 'aws-lambda';
 import { create } from './create';
 
-export const event = async (
+export const watchParties = async (
   event: APIGatewayProxyEventV2
 ): Promise<APIGatewayProxyStructuredResultV2> => {
   console.log(`Event was called`);

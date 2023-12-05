@@ -6,3 +6,5 @@ const dynamo = new DynamoDBClient({
 });
 
 export const client = DynamoDBDocumentClient.from(dynamo);
+
+export const TABLE_NAME = 'fanbae';

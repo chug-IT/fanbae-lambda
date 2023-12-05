@@ -31,7 +31,10 @@ export const protectedRoute = async (
   const email = jwt.verify(authToken, process.env.JWT_SECRET!);
 
   const getCommandOutput = await client.send(
-    new GetCommand({ TableName: 'users', Key: { email } })
+    new GetCommand({
+      TableName: 'fanbae',
+      Key: { PK: `USER#${email}`, SK: `USER#${email}` },
+    })
   );
 
   const { Item } = getCommandOutput;
@@ -41,7 +44,7 @@ export const protectedRoute = async (
       statusCode: 401,
       body: JSON.stringify({
         message: `Unauthorized`,
-        info: `Invalid auth token`,
+        info: `Email ${JSON.stringify(email)} does not exist`,
       }),
     };
   }

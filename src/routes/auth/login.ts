@@ -31,7 +31,10 @@ export const login = async (
   }
 
   const getCommandOutput = await client.send(
-    new GetCommand({ TableName: 'users', Key: { email } })
+    new GetCommand({
+      TableName: 'fanbae',
+      Key: { PK: `USER#${email}`, SK: `USER#${email}` },
+    })
   );
 
   if (!getCommandOutput.Item || getCommandOutput.Item.password !== password) {
