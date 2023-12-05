@@ -8,7 +8,8 @@ import jwt from 'jsonwebtoken';
 
 export const protectedRoute = async (
   handler: (
-    event: APIGatewayProxyEventV2
+    event: APIGatewayProxyEventV2,
+    email: string
   ) => Promise<APIGatewayProxyStructuredResultV2>,
   event: APIGatewayProxyEventV2
 ): Promise<APIGatewayProxyStructuredResultV2> => {
@@ -30,6 +31,16 @@ export const protectedRoute = async (
 
   const email = jwt.verify(authToken, process.env.JWT_SECRET!);
 
+  if (typeof email !== 'string') {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({
+        message: `Unauthorized`,
+        info: `Invalid authorization token`,
+      }),
+    };
+  }
+
   const getCommandOutput = await client.send(
     new GetCommand({
       TableName: 'fanbae',
@@ -44,9 +55,9 @@ export const protectedRoute = async (
       statusCode: 401,
       body: JSON.stringify({
         message: `Unauthorized`,
-        info: `Email ${JSON.stringify(email)} does not exist`,
+        info: `Email ${email} does not exist`,
       }),
     };
   }
-  return await handler(event);
+  return await handler(event, email);
 };

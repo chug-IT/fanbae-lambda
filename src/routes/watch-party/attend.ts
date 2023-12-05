@@ -2,13 +2,20 @@ import {
   APIGatewayProxyEventV2,
   APIGatewayProxyStructuredResultV2,
 } from 'aws-lambda';
-import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { client } from '../../dynamo';
-import jwt from 'jsonwebtoken';
+import { PutCommand } from '@aws-sdk/lib-dynamodb';
 
-export const register = async (
-  event: APIGatewayProxyEventV2
+type AttendInput = {
+  eventId: string;
+};
+
+export const attend = async (
+  event: APIGatewayProxyEventV2,
+  email: string
 ): Promise<APIGatewayProxyStructuredResultV2> => {
+  console.log(`Event attend was called`);
+
+  // validate request
   if (event.requestContext.http.method !== 'POST') {
     return {
       statusCode: 405,
@@ -18,32 +25,30 @@ export const register = async (
     };
   }
 
-  const { name, email, phone, password, birthday } = JSON.parse(
-    event.body || '{}'
-  );
+  // parse and validate body
+  const { eventId } = JSON.parse(event.body || '{}') as Partial<AttendInput>;
 
-  if (!name || !email || !phone || !password || !birthday) {
+  if (!eventId) {
     return {
       statusCode: 400,
       body: JSON.stringify({
-        message: `Name, email, phone, password and birthday are required`,
-        info: `name: ${name}, email: ${email}, phone: ${phone}, password: ${password}, birthday: ${birthday}`,
+        message: `Missing required fields`,
+        info: `eventId: ${eventId}`,
       }),
     };
   }
 
+  // create event
   try {
+    const PK = `EVENT#${eventId}`;
+    const SK = `ATTEND#${email}`;
     await client.send(
       new PutCommand({
         TableName: 'fanbae',
         Item: {
-          PK: `USER#${email}`,
-          SK: `USER#${email}`,
-          name,
+          PK,
+          SK,
           email,
-          phone,
-          birthday,
-          password,
         },
         ConditionExpression: 'attribute_not_exists(PK)',
       })
@@ -58,7 +63,7 @@ export const register = async (
       return {
         statusCode: 409,
         body: JSON.stringify({
-          message: `User with email ${email} already exists`,
+          message: `Attendee with email ${email} already exists`,
         }),
       };
     }
@@ -67,23 +72,14 @@ export const register = async (
       statusCode: 500,
       body: JSON.stringify({
         message: `Internal server error`,
-        info: error,
       }),
     };
   }
 
-  const authToken = jwt.sign(email, process.env.JWT_SECRET!);
-
   return {
     statusCode: 201,
     body: JSON.stringify({
-      authToken,
-      user: {
-        name,
-        email,
-        phone,
-        birthday,
-      },
+      message: `Attendee created successfully`,
     }),
   };
 };

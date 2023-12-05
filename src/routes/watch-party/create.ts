@@ -16,7 +16,8 @@ type WatchPartyInput = {
 };
 
 export const create = async (
-  event: APIGatewayProxyEventV2
+  event: APIGatewayProxyEventV2,
+  hostEmail: string
 ): Promise<APIGatewayProxyStructuredResultV2> => {
   console.log(`Event create was called`);
 
@@ -31,8 +32,9 @@ export const create = async (
   }
 
   // parse and validate body
-  const { name, startDateTime, placeId, amenities, price, hostEmail } =
-    JSON.parse(event.body || '{}') as Partial<WatchPartyInput>;
+  const { name, startDateTime, placeId, amenities, price } = JSON.parse(
+    event.body || '{}'
+  ) as Partial<WatchPartyInput>;
 
   if (
     !name ||
