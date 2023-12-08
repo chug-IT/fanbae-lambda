@@ -6,16 +6,16 @@ import { watchParties } from './routes/watch-party';
 import { attendence } from './routes/attendence';
 
 export const handler: APIGatewayProxyHandlerV2 = async (event, context) => {
-  if (/^\/auth\/v1\/.*$/.test(event.rawPath)) {
+  if (/^\/auth\/v1(\/.*)*$/.test(event.rawPath)) {
     return await auth(event);
   }
-  if (/^\/misc\/v1\/.*$/.test(event.rawPath)) {
+  if (/^\/misc\/v1(\/.*)*$/.test(event.rawPath)) {
     return await protectedRoute(misc, event);
   }
-  if (/^\/watch-party\/v1\/.*$/.test(event.rawPath)) {
+  if (/^\/watch-party\/v1(\/.*)*$/.test(event.rawPath)) {
     return await protectedRoute(watchParties, event);
   }
-  if (/^\/attendence\/v1(\/.)*$/.test(event.rawPath)) {
+  if (/^\/attendence\/v1(\/.*)*$/.test(event.rawPath)) {
     return await protectedRoute(attendence, event);
   }
 

@@ -4,6 +4,7 @@ import {
 } from 'aws-lambda';
 import { client } from '../../dynamo';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
+import { Attendence } from '../../types';
 
 export const create = async (
   event: APIGatewayProxyEventV2,
@@ -45,7 +46,7 @@ export const create = async (
           SK,
           attendeeEmail,
           eventId,
-        },
+        } as Attendence,
         ConditionExpression:
           'attribute_not_exists(PK) AND attribute_not_exists(SK)',
       })

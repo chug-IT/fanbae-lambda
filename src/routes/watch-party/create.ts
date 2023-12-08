@@ -7,10 +7,11 @@ import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import { encode } from 'ngeohash';
 import { client as google } from '../../google-maps';
+import { WatchParty } from '../../types';
 
 type WatchPartyInput = {
   name: string;
-  startDateTime: string;
+  startDateTime: number;
   placeId: string;
   amenities: string[];
   price: number;
@@ -96,7 +97,7 @@ export const create = async (
               price,
               hostEmail,
               eventId: uuid,
-            },
+            } as WatchParty,
             ConditionExpression:
               'attribute_not_exists(pk) AND attribute_not_exists(sk)',
           })

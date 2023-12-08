@@ -13,11 +13,13 @@ export const watchParties = async (
 
   const [resouce, version, func] = event.rawPath.split('/').slice(1);
 
+  const { method } = event.requestContext.http;
+  if (method === 'GET') {
+    return await list(event, email);
+  }
+
   if (func === 'create') {
     return await create(event, email);
-  }
-  if (func === 'list') {
-    return await list(event, email);
   }
   return {
     statusCode: 404,
