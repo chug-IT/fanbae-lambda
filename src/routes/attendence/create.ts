@@ -5,15 +5,11 @@ import {
 import { client } from '../../dynamo';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 
-type AttendInput = {
-  eventId: string;
-};
-
-export const attend = async (
+export const create = async (
   event: APIGatewayProxyEventV2,
-  email: string
+  attendeeEmail: string
 ): Promise<APIGatewayProxyStructuredResultV2> => {
-  console.log(`Event attend was called`);
+  console.log(`Attendence create was called`);
 
   // validate request
   if (event.requestContext.http.method !== 'POST') {
@@ -25,8 +21,7 @@ export const attend = async (
     };
   }
 
-  // parse and validate body
-  const { eventId } = JSON.parse(event.body || '{}') as Partial<AttendInput>;
+  const { eventId } = JSON.parse(event.body || '{}');
 
   if (!eventId) {
     return {
@@ -38,19 +33,21 @@ export const attend = async (
     };
   }
 
-  // create event
+  const PK = `ATTENDENCE#${eventId}`;
+  const SK = `ATTENDENCE#${attendeeEmail}`;
+
   try {
-    const PK = `EVENT#${eventId}`;
-    const SK = `ATTEND#${email}`;
     await client.send(
       new PutCommand({
         TableName: 'fanbae',
         Item: {
           PK,
           SK,
-          email,
+          attendeeEmail,
+          eventId,
         },
-        ConditionExpression: 'attribute_not_exists(PK)',
+        ConditionExpression:
+          'attribute_not_exists(PK) AND attribute_not_exists(SK)',
       })
     );
   } catch (error) {
@@ -58,12 +55,13 @@ export const attend = async (
 
     if (
       error instanceof Error &&
-      error.name === 'ConditionalCheckFailedException'
+      error.message.includes('ConditionalCheckFailedException')
     ) {
       return {
         statusCode: 409,
         body: JSON.stringify({
-          message: `Attendee with email ${email} already exists`,
+          message: `Attendence already exists`,
+          info: `eventId: ${eventId}, attendeeEmail: ${attendeeEmail}`,
         }),
       };
     }
@@ -72,14 +70,16 @@ export const attend = async (
       statusCode: 500,
       body: JSON.stringify({
         message: `Internal server error`,
+        info: `eventId: ${eventId}, attendeeEmail: ${attendeeEmail}`,
       }),
     };
   }
 
   return {
-    statusCode: 201,
+    statusCode: 200,
     body: JSON.stringify({
-      message: `Attendee created successfully`,
+      message: `Attendence created successfully`,
+      info: `eventId: ${eventId}, attendeeEmail: ${attendeeEmail}`,
     }),
   };
 };

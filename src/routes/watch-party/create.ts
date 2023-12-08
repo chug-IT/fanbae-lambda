@@ -5,6 +5,8 @@ import {
 import { client } from '../../dynamo';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
+import { encode } from 'ngeohash';
+import { client as google } from '../../google-maps';
 
 type WatchPartyInput = {
   name: string;
@@ -53,11 +55,31 @@ export const create = async (
     };
   }
 
+  const {
+    data: {
+      result: { geometry },
+    },
+  } = await google.placeDetails({
+    params: { place_id: placeId, key: process.env.GOOGLE_KEY! },
+  });
+  if (!geometry) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        message: `Invalid placeId`,
+        info: `placeId: ${placeId}`,
+      }),
+    };
+  }
+
+  const { lat, lng } = geometry.location;
+  const geohash = encode(lat, lng, 4);
+
   // create event
   try {
     while (true) {
       const uuid = uuidv4();
-      const PK = `EVENT#${uuid}`;
+      const PK = `EVENT#${geohash}`;
       const SK = `EVENT#${uuid}`;
       try {
         await client.send(
@@ -66,12 +88,14 @@ export const create = async (
             Item: {
               PK,
               SK,
+              geohash,
               name,
               startDateTime,
               placeId,
               amenities,
               price,
               hostEmail,
+              eventId: uuid,
             },
             ConditionExpression:
               'attribute_not_exists(pk) AND attribute_not_exists(sk)',
