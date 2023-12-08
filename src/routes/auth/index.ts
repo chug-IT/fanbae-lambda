@@ -4,6 +4,8 @@ import {
 } from 'aws-lambda';
 import { login } from './login';
 import { register } from './register';
+import { protectedRoute } from '../../protected-route';
+import { chooseInterests } from './choose-interests';
 
 export const auth = async (
   event: APIGatewayProxyEventV2
@@ -16,6 +18,8 @@ export const auth = async (
     return await login(event);
   } else if (func === 'register') {
     return await register(event);
+  } else if (func === 'choose-interests') {
+    return protectedRoute(chooseInterests, event);
   }
 
   return {
