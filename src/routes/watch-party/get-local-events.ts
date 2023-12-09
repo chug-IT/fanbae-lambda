@@ -8,7 +8,7 @@ export const getLocalEvents = async (
   lng: string,
   userEmail: string
 ) => {
-  const geohash = encode(parseFloat(lat), parseFloat(lng), 4);
+  const geohash = encode(parseFloat(lat), parseFloat(lng), 2);
 
   const { Items: watchParties } = await client.send(
     new QueryCommand({

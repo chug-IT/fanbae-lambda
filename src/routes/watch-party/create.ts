@@ -74,7 +74,7 @@ export const create = async (
   }
 
   const { lat, lng } = geometry.location;
-  const geohash = encode(lat, lng, 4);
+  const geohash = encode(lat, lng, 2);
 
   // create event
   try {
